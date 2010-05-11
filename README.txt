@@ -1,5 +1,5 @@
 HTTP_ImageResizer: Load and resize images from non-file sources with nginx caching.
-(C) Dmitry Koterov, http://dklab.ru/lib/HTTP_ImageResizer/
+(C) Dmitry Koterov, http://en.dklab.ru/lib/HTTP_ImageResizer/
 
 This library is used to load static image content from anywhere (e.g. from a 
 database, from remote storage etc.), resize it and return to browser. Fetching
