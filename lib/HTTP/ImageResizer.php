@@ -1,6 +1,12 @@
 <?php
 require_once "HTTP/UrlSigner.php";
 
+/**
+ * Resize images "on the fly" or builds a signed URL for an image resize.
+ * You MUST use outer caching system (e.g. nginx) to deal with performance.
+ * 
+ * @version 1.02
+ */
 class HTTP_ImageResizer
 {
 	private $_urlSigner;
@@ -36,7 +42,10 @@ class HTTP_ImageResizer
 		list($mime, $data) = $this->getResize($params);
 		header("Content-Type: $mime");
 		// Cache forever, because file content never changes without ID change.
-		header("Last-Modified: " . gmdate("D, d M Y H:i:s", time()) . " GMT");
+		// Use constant Last-Modified date in the past to ensure that it is NEVER changed
+		// (seems WebKit has an unstable bug when it processes Not Modified response
+		// status which has different Last-Modified than the original cached content). 
+		header("Last-Modified: " . gmdate("D, d M Y H:i:s", 3600 * 24 * 365) . " GMT");
 		header("Expires: Wed, 08 Jul 2037 22:53:52 GMT");
 		header("Cache-Control: public");
 		echo $data;
@@ -167,7 +176,7 @@ class HTTP_ImageResizer
 	
 	private function _getImageSize($data)
 	{
-		$tmp = tempnam('/tmp', 'file');
+		$tmp = tempnam(sys_get_temp_dir(), 'ir');
 		file_put_contents($tmp, $data); // Unfortunately for jpeg - we HAVE to save ALL data, else we cannot detect image size.
 		list ($w, $h, $type) = getimagesize($tmp);
 		$mime = image_type_to_mime_type($type);
